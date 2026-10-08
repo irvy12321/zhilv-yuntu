@@ -6,48 +6,23 @@
 
 相比只输出一段文本的 LLM Demo，这个项目更强调完整链路落地：从 **行程生成、攻略检索、地图信息补全、天气补充，到历史管理与文档导出**，尽量把 AI 能力组织成一个可交互、可保存、可展示的产品原型。
 
-## 📝 最近更新
+## 📝 当前版本与更新记录
 
-<details>
-<summary><strong>查看版本更新记录（最新：2026-07-26）</strong></summary>
+本仓库于 **2026-10-08** 以完整代码快照初始化，初始提交为 [`fa8c679`](https://github.com/irvy12321/zhilv-yuntu/commit/fa8c679bf0b6df22d3dd3768496cbe6cadac9a38)。该提交包含当时已有的功能；后续变更从这一基线继续记录。
 
-- `2026-07-26`
-  - 动态城市：新增 A/B/C 覆盖分级。6 个已沉淀城市继续走本地 RAG；其他可识别城市在候选充足时，通过高德景点、餐饮和住宿 POI 候选直接生成动态方案。用户已手工验证多个城市可以生成。
-  - 真实性约束：动态 Planner 只输出候选 POI ID，服务层校验后回填真实名称、地址、坐标和图片；模型不可用或返回越界 ID 时，也只从本次真实候选池降级。
-  - 输入边界：当前支持单城市规划。青海等普通省级目的地会提示改用具体城市；上海、北京、天津和重庆等直辖市仍按城市处理。
-  - 边界加固：区县级目的地改用行政区 `adcode` 精确过滤候选；明确取消景点时保留空景点列表，避免“自由活动”被地图重新绑定；地图故障会返回脱敏的失败阶段与原因。该组改动待本地回归验收。
-- `2026-07-18`
-  - RAG：知识库扩展为北京、大理、成都、西安、厦门、三亚 6 个目的地；Chunk 写入 `destination` metadata，Chroma 向量检索、关键词 fallback、Rerank 与缓存均按目的地隔离，跨城市污染评估自动纳入北京。
-  - 数据质量：检索扩展词迁移到 `backend/data/retrieval_rules.json`；RAG 评估集更新为 18 条并与当前攻略内容对齐；新增离线一致性校验，能够发现失效规则词、fallback 候选和评估断言词。
-  - 失败降级：模型不可用或候选不足时，行程只展示从当前 RAG 上下文提取的景点、餐饮和住宿名称；没有真实候选就明确留空，不再生成“推荐景点 N”类模板实体。
-  - 开发体验：新增 `start.ps1`，构建并启动后会打印前端、后端和 API 文档地址；新增模型连通性检测脚本，Chat 与 Embedding 可分别诊断。
-- `2026-06-11`
-  - 部署：新增 Docker Compose 容器化部署方案，后端（FastAPI）、前端（Nginx）、Redis 三容器编排，`docker compose up` 一键启动。
-  - 前端：Nginx 反向代理统一前后端入口，两阶段构建优化镜像体积。
-- `2026-05-19`
-  - 工程观测：新增 token 消耗统计，覆盖 Query Rewrite、Query Embedding、qwen3-rerank 与 Planner 生成链路，并在后端终端输出分项与总量。
-  - 接口能力：`/trip/generate` 返回 `token_usage` 字段，`/trip/stats` 支持汇总已保存行程的 token 消耗。
-- `2026-05-07`
-  - RAG：完成 Cross-encoder Rerank（qwen3-rerank）+ 噪声预过滤，Top1 命中率 86.7%→93.3%，MRR 0.922→0.967。
-  - RAG：新增 Rerank 缓存，缓存命中后 Avg Latency 从 728ms 降至 425ms，降幅 41.6%。
-- `2026-05-06`
-  - RAG：完善评估指标体系，新增 MRR、Noise Rate、Latency、Cross-destination Pollution 四个量化指标。
-  - RAG：完成 LLM-based Query Rewrite，用 qwen-max 替代手写规则改写检索 query，Top1 命中率 80%→86.7%，MRR 0.889→0.922。
-- `2026-04-29`
-  - RAG：扩充知识库至 5 个目的地（大理/成都/西安/厦门/三亚），评估样例集扩充至 15 条，完成规则级 Rerank 多层降权与 Query Rewrite 目的地过滤，消除跨目的地污染。
-  - 地图前端：新增地图路线虚线箭头可视化、🚩 旗帜打卡标记与景点图片气泡窗口。
-- `2026-04-25`：完成第一轮 RAG 在线阶段优化，已接入轻量化 Query Rewrite、轻量 Rerank 与检索调试脚本。
-- `2026-04-15`：新增 Redis 缓存层，已覆盖天气查询、地图查询与 RAG 检索结果缓存。
+- 当前代码包含：6 城本地攻略 RAG、动态城市 POI 规划、地图与天气补全、Redis 缓存、Token 统计、历史管理、Markdown/PDF 导出与 Docker Compose 部署配置。
+- 本仓库的变更记录见 [CHANGELOG.md](./CHANGELOG.md)，仅记录初始化及之后实际发生的修改。
+- 导入前的功能演进记录见 [UPSTREAM_CHANGELOG.md](./UPSTREAM_CHANGELOG.md)。其中的日期、测试日志和性能数据属于原项目历史，不对应本仓库的逐次提交，也不作为本仓库的复测结果。
 
-</details>
-
-更多更新见：[CHANGELOG.md](./CHANGELOG.md)
+本次仓库整理已核对代码快照与展示图片；应用运行、外部服务连通性及性能指标需在配置环境后重新验证。
 
 > **数据边界**：6 个本地 Markdown 攻略用于 RAG 参考；动态城市的地点实体来自当次高德 POI 候选。两条路径都不代表门票、酒店价格、营业状态或可预订性已经实时核验，相关金额目前属于规划估算。
 
 ---
 
 ## 📸 效果展示
+
+以下图片为初始版本随附的界面示例，用于展示功能布局，不作为本仓库重新运行的验收结果。
 
 ### 规划页
 
@@ -71,7 +46,7 @@
 
 - 🧠 **LLM 行程生成**：基于 LangChain 与 OpenAI-compatible 接口生成结构化旅行计划，Chat、Embedding、Rerank 模型可分别配置
 - 📚 **本地攻略检索**：覆盖北京、大理、成都、西安、厦门、三亚 6 个目的地，为行程生成补充对应城市的攻略信息，并避免跨城市内容混入
-- 🌐 **动态城市规划**：未沉淀城市先经过行政区解析，再采集景点、餐饮和住宿 POI；候选达到阈值后生成完整方案，用户已手工验证多个城市可用
+- 🌐 **动态城市规划**：未沉淀城市先经过行政区解析，再采集景点、餐饮和住宿 POI；候选达到阈值后进入动态方案生成流程
 - 🗺️ **高德地图接入**：补充景点地址、经纬度、POI ID、路线距离、耗时和景点图片，并支持虚线箭头路线可视化与 🚩 打卡标记
 - 🌦️ **天气感知提示**：前端展示天气预报，并根据雨天/阴天自动修正旅行提示
 - ⚡ **Redis 缓存层**：覆盖天气、地图、RAG 检索与 Rerank 结果缓存，减少重复外部调用开销
@@ -409,7 +384,8 @@ TripPlannerDemo/
 ├── docker-compose.yaml                  # 前端、后端、Redis 编排
 ├── start.ps1                            # Docker Compose 启动脚本
 ├── README.md
-└── CHANGELOG.md
+├── CHANGELOG.md                         # 本仓库初始化及后续变更
+└── UPSTREAM_CHANGELOG.md                # 导入前的原项目历史参考
 ```
 
 > `docs/` 是本地开发与面试准备文档目录，默认已被 `.gitignore` 忽略，不随 GitHub 上传。
@@ -861,17 +837,19 @@ cd frontend
 
 ---
 
-## ✅ 当前完成度
+## ✅ 当前代码能力与验证状态
+
+以下列出当前代码中包含的能力。测试脚本与历史测试记录不等同于本仓库已完成当前环境的回归验收，运行验证方法见上文“测试与验证”。
 
 - ✅ **后端能力**：行程生成、智能编辑、保存查询、历史列表、删除、天气查询、Markdown 导出与 PDF 导出接口
-- ✅ **AI 与数据能力**：6 城本地攻略 RAG 路径 + 未沉淀城市动态 POI 路径；动态 Planner 通过 POI ID 白名单选择景点、餐饮和住宿，用户已手工验证多个城市可生成
+- ✅ **AI 与数据能力**：6 城本地攻略 RAG 路径 + 未沉淀城市动态 POI 路径；动态 Planner 通过 POI ID 白名单选择景点、餐饮和住宿
 - ✅ **RAG 在线优化**：LLM-based Query Rewrite + Cross-encoder Rerank（qwen3-rerank）+ 噪声预过滤 + Rerank 缓存、目的地 metadata 过滤、检索调试脚本与 18 条评估样例集、量化评估指标体系（Top1/TopK Hit Rate、MRR、Noise Rate、Latency、Cross-destination Pollution）
 - ✅ **Token 观测能力**：`/trip/generate` 返回本次 Query Rewrite、Query Embedding、Rerank、Planner 的分项 token 消耗，后端终端同步打印 prompt/completion/total，`/trip/stats` 汇总已保存行程的 token 统计
 - ✅ **前端能力**：规划页、结果页、历史列表页，以及地图/天气/预算展示、导出与历史管理主流程
 - ✅ **缓存与持久化**：SQLite 持久化存储 + Redis 缓存层（覆盖天气、地图、RAG 检索与 Rerank 结果）
 - ✅ **数据一致性与失败降级**：规则、fallback、评估断言与目的地 metadata 可离线校验；RAG 和动态候选路径均不生成模板化地点，模型返回候选池外 ID 时自动拒绝
 - ⚠️ **数据边界**：当前 Markdown 攻略仅作参考知识；价格、营业状态和可预订性尚未逐条接入可追溯的实时或人工核验来源
-- ⚠️ **外部模型依赖**：本地离线测试已通过；实际 Chat、Embedding、Rerank 调用仍取决于模型账户状态、模型开通情况和 `.env` 配置
+- ⚠️ **验证与外部模型依赖**：需在当前环境重新执行离线回归及在线验证；实际 Chat、Embedding、Rerank 调用取决于模型账户状态、模型开通情况和 `.env` 配置
 
 ---
 
@@ -880,9 +858,9 @@ cd frontend
 - ✅ **缓存与工程化能力**
   已完成 Redis 缓存层，覆盖天气查询、地图查询、RAG 检索结果与 Rerank 结果缓存；后续可扩展到会话态管理、热点目的地复用与更细粒度的缓存命中统计。
 - ✅ **RAG 检索增强**
-  - ✅ 规则级 Query Rewrite → LLM-based Query Rewrite（qwen-max），Top1 80%→86.7%，MRR 0.889→0.922。
-  - ✅ 规则级 Rerank → Cross-encoder Rerank（qwen3-rerank）+ 噪声预过滤 + Rerank 缓存，Top1 86.7%→93.3%，MRR 0.922→0.967。
-  - ✅ 知识库已覆盖 6 个目的地，评估样例集 18 条；规则、fallback、评估断言与目的地 metadata 已有离线一致性校验。模型账户恢复后需重新执行真实 RAG 评估，建立新的在线质量基线。
+  - 当前代码包含 LLM-based Query Rewrite 与规则 fallback。
+  - 当前代码包含 Cross-encoder Rerank（qwen3-rerank）、噪声预过滤与 Rerank 缓存。
+  - 知识库覆盖 6 个目的地，评估样例集为 18 条；已提供规则、fallback、评估断言与目的地 metadata 的离线一致性校验脚本。完成环境配置后，需重新执行评估并记录模型、样本量及缓存状态，建立本仓库的质量与延迟基线。
 - 🚧 **Token 成本分析看板**
   已完成后端 token 统计与 `/trip/stats` 汇总接口，后续可在前端增加成本分析面板，对比不同 RAG 策略下的 token 消耗、延迟和生成质量。
 - 🚧 **检索结果压缩与去冗**
